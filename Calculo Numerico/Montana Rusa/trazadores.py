@@ -1,5 +1,4 @@
 import numpy as np
-import sympy as sym
 
 def generar_trazador_cubico(valores_x, valores_y, frontera=None):
     """Genera un trazador cúbico a partir de los puntos con las coordenadas dadas.
@@ -14,14 +13,14 @@ def generar_trazador_cubico(valores_x, valores_y, frontera=None):
     if cant_puntos != len(valores_y):
         raise ValueError(
             "La cantidad de coordenadas x e y deben ser iguales")
-    
+
     # Sistema de ecuaciones lineales de 4n-4 incognitas/ecuaciones
     # para n puntos
     n = 4*cant_puntos - 4
     A = np.zeros((n, n))  # Matriz de coeficientes
     b = np.zeros(n)       # Vector de términos independientes
     del n
-    
+
     # Los segmentos deben coincidir con los puntos en los valores que toman
     # Si(x[i]) = y[i] & Si(x[i+1]) = y[i+1]
     # Si(x) = ai + bi*x + ci*x**2 + di*x**3
@@ -59,7 +58,7 @@ def generar_trazador_cubico(valores_x, valores_y, frontera=None):
         x = x_medio
         A[i_0, i4 + 2] = 2 * x
         A[i_0, i44 + 2] = -2 * x
-        
+
         x *= x_medio
         A[i_0, i4 + 3] = 3 * x
         A[i_0, i44 + 3] = -3 * x
@@ -119,28 +118,24 @@ def generar_trazador_cubico_sujeto(valores_x, valores_y):
     "Véase la documentación de generar_trazador_cubico"
     return generar_trazador_cubico(valores_x, valores_y, 0)
 
-def trazador_a_simbolico(coeficientes_polinomios):
-    "Transforma una matriz de un trazador en uno simbólico de sympy"
-    if not (isinstance(coeficientes_polinomios, np.ndarray)
-            and coeficientes_polinomios.ndim == 2):
-        raise ValueError("el argumento debe ser una matriz de numpy")
-    x = sym.Symbol("x")
-    potencias = [x**i for i in range(coeficientes_polinomios.shape[1])]
-    simbolicos = []
-    for i in range(coeficientes_polinomios.shape[0]):
-        simbolicos.append(sym.lambdify(x, sym.Add( *(coeficiente * potencia
-            for coeficiente, potencia in zip(coeficientes_polinomios[i],
-                                             potencias)) ), "numpy") )
-    return simbolicos
-
-def generar_trazador_cubico_sujeto_simbolico(valores_x, valores_y):
-    simbolicos = trazador_a_simbolico(
-        generar_trazador_cubico_sujeto(valores_x, valores_y) )
+def generar_trazador_cubico_sujeto_funcional(valores_x, valores_y):
+    coeficientes_polinomios = generar_trazador_cubico_sujeto(valores_x,
+                                                             valores_y)
     def trazador(x):
+        en_rango = False
         for i in range(len(valores_x) - 1):
             if valores_x[i] <= x < valores_x[i + 1]:
-                return simbolicos[i](x)
-        if x == valores_x[-1]:
-            return simbolicos[-1](x)
+                en_rango = True
+                break
+        if not en_rango:
+            if x != valores_x[-1]:
+                raise ValueError("'%f' está fuera del dominio del trazador: [%f; %f]"
+                                 % (x, valores_x[0], valores_x[-1]))
+            #else:
+            #    i = len(valores_x) - 2
+        potencias = np.float64(
+            [x**i for i in range(coeficientes_polinomios.shape[1])] )
+        return np.dot(coeficientes_polinomios[i], potencias)
+
     return trazador
 
