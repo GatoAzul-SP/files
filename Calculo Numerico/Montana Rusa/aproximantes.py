@@ -1,9 +1,8 @@
 import numpy as np
+from sistema_ec_lineales import resolver_ec_lineales
 
 def generar_polinomio_min_cuadrados(valores_x, valores_y, grado):
-    """Genera un polinomio de ajuste por mínimos cuadrados.
-
-    """
+    """Genera un polinomio de ajuste por mínimos cuadrados."""
     cant_puntos = len(valores_x)
     if cant_puntos != len(valores_y):
         raise ValueError(
@@ -37,5 +36,6 @@ def generar_polinomio_min_cuadrados(valores_x, valores_y, grado):
     for i in range(grado1):  # b.size == A.shape[0] == grado + 1
         A[i] = sum_potencias_x[i:i + grado1]
 
-    return np.linalg.solve(A, b)
+    #return np.linalg.solve(A, b)
+    return resolver_ec_lineales(A, b)
 
