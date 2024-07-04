@@ -39,3 +39,11 @@ def generar_polinomio_min_cuadrados(valores_x, valores_y, grado):
     #return np.linalg.solve(A, b)
     return resolver_ec_lineales(A, b)
 
+def generar_polinomio_min_cuadrados_funcional(valores_x, valores_y, grado):
+    coeficientes_polinomio = \
+       generar_polinomio_min_cuadrados(valores_x, valores_y, grado)
+    def aproximante(x):
+        potencias = np.float64(
+            [x**i for i in range(coeficientes_polinomio.size)] )
+        return np.dot(coeficientes_polinomio, potencias)
+    return aproximante
