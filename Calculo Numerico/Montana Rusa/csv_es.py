@@ -9,9 +9,11 @@ def parametros_desde_csv(nombre_archivo):
     Los puntos se ordenan automáticamente de manera creciente, y se genera
     un error si hay dos puntos repetidos.
 
-    El tercer valor leído es una tupla de tres números que corresponden
-    con dos valores extremos y una cuenta de valores de muestras 'x'
-    para calcular las ordenadas respectivas de esos puntos para una función"""
+    El tercer valor leído es una tupla de dos reales y un entero
+    que corresponden con dos valores extremos y una cuenta de valores de
+    muestras 'x' para calcular las ordenadas respectivas de esos puntos
+    para una función.
+    """
 
     try:
         with open(nombre_archivo, newline="") as archivo:
