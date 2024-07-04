@@ -1,8 +1,8 @@
 import csv
 import numpy as np
 
-def parametros_desde_csv(nombre_archivo):
-    """Obtiene una tupla de tres vectores de numpy desde un archivo csv
+def puntos_desde_csv(nombre_archivo):
+    """Obtiene una tupla de tres vectores de numpy desde un archivo csv.
 
     Dos vectores de igual longitud se leen del archivo 'csv' que corresponden
     a las coordenadas de 'x' e 'y' de una serie de puntos.
@@ -40,6 +40,29 @@ def parametros_desde_csv(nombre_archivo):
         anterior = valor
 
     return (valores_x, valores_y, np.linspace(*intervalo))
+
+def sistema_ec_lineales_desde_csv(nombre_archivo):
+    coeficientes = []
+    try:
+        with open(nombre_archivo, newline="") as archivo:
+            lector = iter(csv.reader(archivo))
+            coeficientes.append(next(lector))
+            orden = len(coeficientes[0])
+            coeficientes.extend(list(lector))
+    except OSError as e:
+        raise type(e)("No se pudo leer el archivo") from e
+    except StopIteration as e:
+        raise ValueError("No hay suficientes datos en el archivo") from e
+
+    for fila in coeficientes:
+        if len(fila) != orden:
+            raise ValueError("Las filas no tienen el mismo tamaño")
+    if len(coeficientes) != orden + 1:
+        raise ValueError("Debe haber una fila más que la cantidad de columnas")
+
+    terms_indep = np.float64(coeficientes.pop())
+    coeficientes = np.float64(coeficientes)
+    return (coeficientes, terms_indep)
 
 def ordenar_por_iesimo(secuencias, indice):
     """Ordena las secuencias tomando como referencia aquella en posición indice.
