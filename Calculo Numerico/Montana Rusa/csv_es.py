@@ -26,6 +26,9 @@ def puntos_desde_csv(nombre_archivo):
     except StopIteration as e:
         raise ValueError("No hay suficientes datos en el archivo") from e
 
+    return leer_puntos(valores_x, valores_y, intervalo)
+
+def leer_puntos(valores_x, valores_y, intervalo):
     if len(valores_x) != len(valores_y):
         raise ValueError("La cantidad de coordenadas 'x' e 'y' no coinciden")
     if len(intervalo) != 3:
@@ -47,20 +50,31 @@ def sistema_ec_lineales_desde_csv(nombre_archivo):
         with open(nombre_archivo, newline="") as archivo:
             lector = iter(csv.reader(archivo))
             coeficientes.append(next(lector))
-            orden = len(coeficientes[0])
             coeficientes.extend(list(lector))
     except OSError as e:
         raise type(e)("No se pudo leer el archivo") from e
     except StopIteration as e:
         raise ValueError("No hay suficientes datos en el archivo") from e
 
+    terms_indep = coeficientes.pop()
+    try:
+        return leer_sistema_ec_lineales(coeficientes, terms_indep)
+    except ValueError as e:
+        if e.args[0].endswith("columnas"):
+            raise ValueError(
+                "Debe haber una fila más que la cantidad de columnas") from None
+        raise
+
+def leer_sistema_ec_lineales(coeficientes, terms_indep):
+    orden = len(coeficientes[0])
     for fila in coeficientes:
         if len(fila) != orden:
             raise ValueError("Las filas no tienen el mismo tamaño")
-    if len(coeficientes) != orden + 1:
-        raise ValueError("Debe haber una fila más que la cantidad de columnas")
+    if len(coeficientes) != orden:
+        raise ValueError(
+            "La matriz de coeficientes debe tener tantas filas como columnas")
 
-    terms_indep = np.float64(coeficientes.pop())
+    terms_indep = np.float64(terms_indep)
     coeficientes = np.float64(coeficientes)
     return (coeficientes, terms_indep)
 
