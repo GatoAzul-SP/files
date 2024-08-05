@@ -1,3 +1,4 @@
+import math, sys
 
 def leer_float(numero):
     if not isinstance(numero, str):
@@ -13,10 +14,10 @@ def leer_float(numero):
         raise ValueError("No hay número a convertir")
 
     negativo = False
-    if numero[0][0] == "-":
+    if len(numero[0]) > 0 and numero[0][0] == "-":
         numero[0] = numero[0][1:]
         negativo = True
-    entero = decimal = "0"
+    entero = decimal = ""
     if len(numero) == 1:
         entero = numero[0]
     else:
@@ -24,20 +25,26 @@ def leer_float(numero):
             entero = numero[0]
         if len(numero[1]) > 0:
             decimal = numero[1]
-    if numero[0]
+    entero, decimal = entero.lstrip("0"), decimal.rstrip("0")
+    if entero == "":
+        entero = "0"
+    if decimal == "":
+        decimal == "0"
 
     return entero, decimal, negativo
 
-def desde_base(base, entero, decimal, funcion, negativo=False):
-    parte_entera = funcion(entero[0])
-    for digito in entero[1:]:
+def entero_desde_base(base, entero, funcion):
+    parte_entera = 0
+    for digito in entero:
         parte_entera *= base
         parte_entera += funcion(digito)
+    return parte_entera
 
-    parte_decimal = 0
-    for digito in reversed(decimal):
-        parte_decimal += funcion(digito)
-        parte_decimal /= base
+def desde_base(base, entero, decimal, funcion, negativo=False):
+    parte_entera = entero_desde_base(base, entero, funcion)
+
+    parte_decimal = entero_desde_base(base, decimal, funcion)
+    parte_decimal /= base ** len(decimal)
 
     numero = parte_entera + parte_decimal
     return -numero if negativo else numero
@@ -47,27 +54,27 @@ def desde_binario(numero):
     if len(entero.strip("01") + decimal.strip("01")) > 0:
         raise ValueError(
             "El número contiene caracteres aparte de dígitos binarios")
-    return desde_base(2, entero, decimal, float, negativo)
+    return desde_base(2, entero, decimal, int, negativo)
 
 def desde_ternario(numero):
     entero, decimal, negativo = leer_float(numero)
     if len(entero.strip("012") + decimal.strip("012")) > 0:
         raise ValueError(
             "El número contiene caracteres aparte de dígitos ternarios")
-    return desde_base(3, entero, decimal, float, negativo)
+    return desde_base(3, entero, decimal, int, negativo)
 
 def desde_octal(numero):
     entero, decimal, negativo = leer_float(numero)
     if len((entero + decimal).strip("01234567")) > 0:
         raise ValueError(
             "El número contiene caracteres aparte de dígitos octales")
-    return desde_base(8, entero, decimal, float, negativo)
+    return desde_base(8, entero, decimal, int, negativo)
 
 def desde_digito_hexadecimal(digito):
     if digito in ("A", "B", "C", "D", "E", "F"):
-        digito = ord(digito) - ord("A") + 10.0
+        digito = ord(digito) - ord("A") + 10
     else:
-        digito = float(digito)
+        digito = int(digito)
     return digito
 
 def desde_hexadecimal(numero):
@@ -85,29 +92,54 @@ def partir_float(numero):
     decimal = numero - entero
     return entero, decimal, negativo
 
-def a_base(base, entero, decimal, funcion, negativo=False):
+def entero_a_base_aux(base, entero, funcion):
     numero = []
     if entero == 0:
-        numero.append("0")
-    else:
-        while entero > 0:
-            digito = entero % base
-            entero //= base
-            numero.append(funcion(digito))
-        numero.reverse()
+        return ["0"]
+    while entero > 0:
+        digito = entero % base
+        entero //= base
+        numero.append(funcion(digito))
+    numero.reverse()
+    return numero
 
-    if negativo:
-        numero.insert(0, "-")
+try:
+    ulp = math.ulp
+except NameError:
+    def ulp(x):
+        exponente = math.frexp(x)[1] - 1
+        return math.ldexp(sys.float_info.epsilon, exponente)
+
+def contar_decimales(decimal, base):
+    "Realmente cuenta la cantidad de digítos reservada por un float para"
+    " sus decimales."
+    exponente = -(math.frexp(ulp(decimal))[1] - 1)
+    exponente /= math.log2(base)
+    if math.ceil(exponente) != exponente:
+        exponente -= ulp(exponente)
+        exponente = math.ceil(exponente)
+    return exponente
+
+def a_base(base, entero, decimal, funcion, negativo=False):
+    numero = ["-"] if negativo else []
 
     if decimal > 0:
+        cant_decimales = contar_decimales(decimal, base)
+        decimal_ajustado = decimal + ulp(decimal)
+        if decimal_ajustado >= 1:
+            entero += 1
+            decimal_ajustado -= 1
+            decimal = round(decimal_ajustado, contar_decimales(decimal, 10) - 1)
+        decimal *= base ** cant_decimales
+
+    numero += entero_a_base_aux(base, entero, funcion)
+    if decimal > 0:
         numero.append(".")
-        while decimal > 0:
-            decimal *= base
-            digito = int(decimal)
-            decimal -= digito
-            numero.append(funcion(digito))
+        numero += entero_a_base_aux(base, int(decimal), funcion)
 
     numero = "".join(numero)
+    if numero != "0":
+        numero = numero.rstrip("0")
     return numero
 
 def a_binario(numero):
