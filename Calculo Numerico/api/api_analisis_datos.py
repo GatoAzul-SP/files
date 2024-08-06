@@ -17,7 +17,7 @@ EXCEPCION_DATOS_MAL_FORMADOS = HTTPException(422, detail=
                         [{"msg": "Datos mal formados. Cárguelos nuevamente"}])
 
 @router.put("/cargar-datos", status_code=204)
-def cargar_datos(datos: str = Body()) -> None:
+def cargar_datos(datos: str = Body(media_type="text/plain")) -> None:
     archivo = open(RUTA_DATOS, "w")
     archivo.write(datos)
     archivo.flush()
@@ -27,7 +27,7 @@ def cargar_datos(datos: str = Body()) -> None:
 def dispersion_primeros_1000() -> Response:
     try:
         datos = leer_modelo(RUTA_DATOS)
-    except ValueError:
+    except (ValueError, FileNotFoundError):
         raise EXCEPCION_DATOS_MAL_FORMADOS
     imagen = graficar_dispersion_primeros_1000(datos)
     return Response(imagen, media_type="imagen/png")
@@ -36,7 +36,7 @@ def dispersion_primeros_1000() -> Response:
 def dispersion_1000_mayor_rapidez() -> Response:
     try:
         datos = leer_modelo(RUTA_DATOS)
-    except ValueError:
+    except (ValueError, FileNotFoundError):
         raise EXCEPCION_DATOS_MAL_FORMADOS
     imagen = graficar_dispersion_1000_mayor_rapidez(datos)
     return Response(imagen, media_type="imagen/png")
@@ -45,7 +45,7 @@ def dispersion_1000_mayor_rapidez() -> Response:
 def histograma_rapidez() -> Response:
     try:
         datos = leer_modelo(RUTA_DATOS)
-    except ValueError:
+    except (ValueError, FileNotFoundError):
         raise EXCEPCION_DATOS_MAL_FORMADOS
     imagen = graficar_histograma_rapidez(datos)
     return Response(imagen, media_type="imagen/png")
@@ -54,7 +54,7 @@ def histograma_rapidez() -> Response:
 def rapidez_media_mensual():
     try:
         datos = leer_modelo(RUTA_DATOS)
-    except ValueError:
+    except (ValueError, FileNotFoundError):
         raise EXCEPCION_DATOS_MAL_FORMADOS
     tabla, imagen = rapidez_media_mensual(datos)
     return {"tabla": tabla, "imagen": b64encode(imagen)}
@@ -63,7 +63,7 @@ def rapidez_media_mensual():
 def tabla_rapidez_media_mensual():
     try:
         datos = leer_modelo(RUTA_DATOS)
-    except ValueError:
+    except (ValueError, FileNotFoundError):
         raise EXCEPCION_DATOS_MAL_FORMADOS
     tabla = tabla_desde_historico(rapidez_media_mensual_aux(datos))
     return tabla
@@ -72,7 +72,7 @@ def tabla_rapidez_media_mensual():
 def rapidez_media_mensual_anual():
     try:
         datos = leer_modelo(RUTA_DATOS)
-    except ValueError:
+    except (ValueError, FileNotFoundError):
         raise EXCEPCION_DATOS_MAL_FORMADOS
     imagen = graficar_historico_mensual(
         tabla_desde_historico_aux(rapidez_media_mensual_aux(datos)) )

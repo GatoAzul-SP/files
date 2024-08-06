@@ -3,6 +3,7 @@ import os
 from io import BytesIO
 import pandas as pd
 import matplotlib as mpl
+import matplotlib.style
 from matplotlib.figure import Figure
 
 def graficar_dispersion_primeros_1000(modelo):
@@ -22,9 +23,9 @@ def graficar_histograma_rapidez(modelo):
     imagen, grafico = crear_imagen_y_grafico()
     modelo.plot.hist("Rapidez (m/s)", bins=36, alpha=0.75, edgecolor='black',
                      ax=grafico)
-    grafico.xlabel("Rapidez (m/s)")
-    grafico.ylabel("Frecuencia")
-    grafico.title("Histograma de la rapidez del viento")
+    grafico.set_xlabel("Rapidez (m/s)")
+    grafico.set_ylabel("Frecuencia")
+    grafico.set_title("Histograma de la rapidez del viento")
     return grafico_a_bytes(imagen)
 
 def rapidez_media_mensual_aux(modelo):
@@ -39,8 +40,8 @@ def rapidez_media_mensual(modelo):
     tabla = mensual.to_frame("Rapidez media (m/s)").to_html()
     imagen, grafico = crear_imagen_y_grafico((15, 5))
     mensual.plot(ax=grafico)
-    grafico.ylabel("Rapidez media (m/s)")
-    grafico.title("Historico mensual de la rapidez media del viento")
+    grafico.set_ylabel("Rapidez media (m/s)")
+    grafico.set_title("Historico mensual de la rapidez media del viento")
     return tabla, grafico_a_bytes(imagen)
 
 def tabla_desde_historico_aux(mensual):
@@ -54,9 +55,9 @@ def graficar_historico_mensual(tabla_mensual):
 
     imagen, grafico = crear_imagen_y_grafico((15, 5))
     tabla_mensual.plot(linewidth=1.5, ax=grafico)
-    grafico.ylabel("Rapidez media (m/s)")
+    grafico.set_ylabel("Rapidez media (m/s)")
     grafico.legend(loc="upper right", ncol=8)
-    grafico.title("Rapidez media mensual del viento por año")
+    grafico.set_title("Rapidez media mensual del viento por año")
     return grafico_a_bytes(imagen)
 
 def leer_modelo(archivo):
