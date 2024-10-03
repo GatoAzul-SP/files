@@ -118,7 +118,7 @@ def contar_decimales(decimal, base):
     if math.ceil(exponente) != exponente:
         exponente -= ulp(exponente)
         exponente = math.ceil(exponente)
-    return exponente
+    return int(exponente)
 
 def a_base(base, entero, decimal, funcion, negativo=False):
     numero = ["-"] if negativo else []
@@ -135,10 +135,12 @@ def a_base(base, entero, decimal, funcion, negativo=False):
     numero += entero_a_base_aux(base, entero, funcion)
     if decimal > 0:
         numero.append(".")
-        numero += entero_a_base_aux(base, int(decimal), funcion)
+        parte_decimal = entero_a_base_aux(base, int(decimal), funcion)
+        numero += ["0"] * (cant_decimales - len(parte_decimal))
+        numero += parte_decimal
 
     numero = "".join(numero)
-    if numero != "0":
+    if numero != "0" and decimal > 0:
         numero = numero.rstrip("0")
     return numero
 
