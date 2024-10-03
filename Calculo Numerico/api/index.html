@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Evaluaciones de Cálculo Numérico</title>
+    <link rel="stylesheet" href="index.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+</head>
+<body>
+    <main>
+        <form id="app-conversion-bases" v-on:submit.prevent="calcular">
+            <h3>Convierte números entre bases numéricas</h3>
+            <div class="fila">
+                <label>Número: <input type="text" placeholder="A3DE95" v-model="numero" required="" /></label>
+                <label>Desde base:
+                    <select v-model.number="desde">
+                        <option v-for="base of bases">{{base}}</option>
+                    </select>
+                </label>
+                <label>A base:
+                    <select v-model.number="a">
+                        <option v-for="base of bases">{{base}}</option>
+                    </select>
+                </label>
+            </div>
+            <input type="submit" value="Calcular" />
+            <output><input type="text" readonly="" v-model="salida" /></output>
+        </form>
+    </main>
+    
+    <script src="index.js"></script>
+</body>
+</html>
