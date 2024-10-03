@@ -1,0 +1,42 @@
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+main {
+    background-color: ghostwhite;
+    padding: 1em;
+}
+
+form {
+    display: block;
+    margin: 1em 0;
+    border: 1px solid black;
+    border-radius: 2em;
+    padding: 2em;
+}
+
+form > * {
+    display: block;
+    margin: 1em 0;
+}
+
+form > :first-child {
+    margin-top: 0;
+}
+
+form > :last-child {
+    margin-bottom: 0;
+}
+
+.fila > * {
+    margin: 0 1em;
+}
+
+.fila > :first-child {
+    margin-left: 0;
+}
+
+.fila > :last-child {
+    margin-right: 0;
+}
